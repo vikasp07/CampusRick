@@ -1,79 +1,31 @@
-require('dotenv').config(); // Load environment variables
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const Token = require('./models/Token'); // Import Token model
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+
+const rideRoutes = require("./routes/rides");
+const groupRoutes = require("./routes/group");
+const driverRoutes = require("./routes/driver");
 
 const app = express();
+
+app.use(cors());
 app.use(bodyParser.json());
 
-// Connect to MongoDB using .env variables
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("✅ Connected to MongoDB"))
-.catch(err => console.error("❌ MongoDB connection error:", err));
+app.use("/api/rides", rideRoutes);
+app.use("/api/groups", groupRoutes);
+app.use("/api/drivers", driverRoutes);
 
-// Helper functions
-function generateNum() {
-  return parseInt(String(Math.floor(Math.random() * 1001)).padStart(4, '0'));
-}
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.log("MongoDB connection error:", err));
 
-function generateTime() {
-  return new Date();
-}
-
-function generateExp(createdAt) {
-  return new Date(createdAt.getTime() + 10 * 60 * 1000); // 10 minutes expiry
-}
-
-// Endpoint: Create a Token
-app.post('/api/get', async (req, res) => {
-  try {
-    const { userId } = req.body;
-    if (!userId) {
-      return res.status(400).json({ error: "userId is required" });
-    }
-
-    const now = generateTime();
-    const tokenData = {
-      userId,
-      tokenNo: generateNum(),
-      createdAt: now,
-      expiredAt: generateExp(now)
-    };
-
-    const token = new Token(tokenData);
-    const savedToken = await token.save();
-    res.json({ tokenId: savedToken._id });
-  } catch (error) {
-    console.error("Error in /api/get:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// Endpoint: Check Token Status
-app.post('/api/check', async (req, res) => {
-  try {
-    const { userId } = req.body;
-    if (!userId) {
-      return res.status(400).json({ error: "userId is required" });
-    }
-
-    const tokens = await Token.find({ userId });
-    const currentTime = generateTime();
-    let activeFound = tokens.some(token => token.expiredAt && currentTime < token.expiredAt);
-
-    res.json({ expired: !activeFound });
-  } catch (error) {
-    console.error("Error in /api/check:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// Start the server
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });

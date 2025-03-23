@@ -1,14 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const tokenSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
-  tokenNo: { type: Number, required: true },
-  createdAt: { type: Date, required: true, default: Date.now },
-  expiredAt: { type: Date, required: true }
-});
+const tokenSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    tokenNo: { type: String, required: true },
+    expiredAt: { type: Date, required: true },
+  },
+  { timestamps: true }
+);
 
-// Automatically remove expired tokens
-tokenSchema.index({ expiredAt: 1 }, { expireAfterSeconds: 0 });
-
-const Token = mongoose.model('Token', tokenSchema);
-module.exports = Token;
+module.exports = mongoose.model("Token", tokenSchema);
