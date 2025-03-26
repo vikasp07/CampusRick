@@ -1,13 +1,35 @@
+// models/Driver.js
 const mongoose = require("mongoose");
 
-const driverSchema = new mongoose.Schema(
+const DriverSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    vehicleNo: { type: String, required: true },
-    available: { type: Boolean, default: true },
-    location: { type: { lat: Number, lon: Number }, required: true },
+    name: {
+      type: String,
+      required: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    vehicleNo: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    idProof: {
+      type: String,
+      required: true,
+    },
+    profilePhoto: {
+      type: String,
+    },
+    available: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Driver", driverSchema);
+module.exports = mongoose.model("Driver", DriverSchema);
